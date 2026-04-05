@@ -150,6 +150,47 @@ fetch(API_URL)
         window.location.href = "https://www.google.com/maps/search/?api=1&query=" + data.hotel;
     };
 
+    // 🚨 FONCTION JE SUIS PERDU
+function sendLocation() {
+
+    if (!navigator.geolocation) {
+        alert("La géolocalisation n'est pas supportée");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(position => {
+
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+
+        // 📡 ENVOI (optionnel si tu veux Logs)
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                nom: currentVoyageur.nom,
+                prenom: currentVoyageur.prenom,
+                agence: currentVoyageur.agence,
+                latitude: lat,
+                longitude: lon
+            })
+        });
+
+        // 💬 WhatsApp
+        const message = encodeURIComponent(
+            "🚨 *URGENCE VOYAGEUR PERDU*\n\n" +
+            "👤 Nom : " + currentVoyageur.prenom + " " + currentVoyageur.nom + "\n" +
+            "🏢 Agence : " + currentVoyageur.agence + "\n\n" +
+            "📍 Position :\n" + mapsLink
+        );
+
+        window.open(`https://wa.me/${guideNumber}?text=${message}`, "_blank");
+
+    }, () => {
+        alert("Impossible de récupérer votre position");
+    });
+}
 });
 
 // 🎨 Changer background
