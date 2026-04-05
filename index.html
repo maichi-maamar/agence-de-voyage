@@ -3,128 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carte NFC – Académie de Football</title>
+<title>Carte Voyageur</title>
 
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    color: #222;
+    font-family: 'Poppins', sans-serif;
+    background: #000;
+    color: white;
+    text-align: center;
+    transition: background 0.5s;
+}
+
+/* Background dynamique */
+body.custom-bg {
+    background-size: cover;
+    background-position: center;
 }
 
 .container {
-    max-width: 420px;
-    margin: auto;
-    padding: 15px;
-}
-
-.academy-name {
-    text-align: center;
-    font-size: 26px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.player-image {
-    height: 226px; /* 60 mm */
-    background: #ddd;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.player-image img {
-    max-height: 100%;
-    max-width: 100%;
-    border-radius: 10px;
+    padding: 20px;
 }
 
 .card {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.5);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    margin-top: 20px;
 }
 
-.card h3 {
-    margin-top: 0;
-    font-size: 18px;
-    margin-bottom: 10px;
+h1 {
+    margin-bottom: 5px;
 }
 
-.btn {
-    width: 100%;
+button {
+    width: 90%;
     padding: 15px;
-    background: #1e88e5;
-    color: white;
+    margin: 10px;
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
     font-size: 16px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
-.footer {
-    text-align: center;
-    font-size: 13px;
-    color: #777;
-    margin-top: 20px;
+.btn-guide { background: #ff4d4d; }
+.btn-hotel { background: #00cc66; }
+.btn-activity { background: #ffaa00; }
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* Upload image */
+.upload-box {
+    margin-top: 15px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.label-upload {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #0072ff;
+    border-radius: 10px;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-    <div class="academy-name">Académie Football Excellence</div>
+    <h1 id="agence">Agence</h1>
+    <p id="voyageur">Chargement...</p>
 
-    <div class="player-image">
-        <img src="joueur.jpg" alt="Photo du joueur">
+    <div class="card">
+        <h2>📍 Activités</h2>
+        <div id="activities"></div>
     </div>
 
     <div class="card">
-        <h3>Informations du joueur</h3>
-        <p><strong>Nom :</strong> BENKACEM</p>
-        <p><strong>Prénom :</strong> Ahmed</p>
-        <p><strong>Âge :</strong> 13 ans</p>
-        <p><strong>Poids :</strong> 45 kg</p>
-        <p><strong>Catégorie :</strong> U13</p>
-        <p><strong>Année sportive :</strong> 2025 – 2026</p>
+        <h2>🆘 Assistance</h2>
+        <button class="btn-guide" onclick="callGuide()">📞 Appeler le guide</button>
+        <button class="btn-hotel" onclick="goHotel()">🏨 Retour à l'hôtel</button>
     </div>
 
     <div class="card">
-        <h3>Académie</h3>
-        <p><strong>Entraîneur :</strong> Coach Mourad</p>
-        <p><strong>Téléphone :</strong> <a href="tel:+213555000000">+213 555 00 00 00</a></p>
-        <p><strong>Facebook :</strong> <a href="https://facebook.com/academie" target="_blank">Page officielle</a></p>
+        <h2>🎨 Personnaliser le fond</h2>
+        <div class="upload-box">
+            <label class="label-upload">
+                📷 Choisir une image
+                <input type="file" accept="image/*" onchange="changeBackground(event)">
+            </label>
+        </div>
     </div>
-
-    <button class="btn" onclick="envoyerPresence()">✔ Enregistrer ma présence</button>
-
-    <div class="footer">Carte NFC officielle – Académie</div>
 
 </div>
 
 <script>
-function envoyerPresence() {
-    const data = {
-        nom: "BENKACEM",
-        prenom: "Ahmed",
-        categorie: "U13",
-        saison: "2025-2026"
+
+// 🔗 Récupération ID
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+// ⚠️ Remplace ici par ton lien Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbwAurGt2tOdHqu_QALrvy6MrXVOaqw0pm6I5BZP5pUt9nwrcyvq54zlbrPGf_AySOLD/exec" + id;
+
+// 📡 Chargement données
+fetch(API_URL)
+.then(res => res.json())
+.then(data => {
+
+    if(data.error){
+        document.getElementById("voyageur").innerText = "Voyageur introuvable";
+        return;
+    }
+
+    document.getElementById("voyageur").innerText = data.prenom + " " + data.nom;
+    document.getElementById("agence").innerText = data.agence;
+
+    const activities = data.activites.split(",");
+    const container = document.getElementById("activities");
+
+    activities.forEach(act => {
+        const btn = document.createElement("button");
+        btn.className = "btn-activity";
+        btn.innerText = act;
+        container.appendChild(btn);
+    });
+
+    // 📞 Appel guide
+    window.callGuide = () => {
+        window.location.href = "tel:" + data.guide;
     };
 
-    fetch("COLLE_ICI_L_URL_DU_SCRIPT_GOOGLE", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {"Content-Type": "application/json"}
-    })
-    .then(() => alert("Présence enregistrée avec succès ✅"))
-    .catch(() => alert("Erreur lors de l’enregistrement ❌"));
+    // 🏨 Retour hôtel
+    window.goHotel = () => {
+        window.location.href = "https://www.google.com/maps/search/?api=1&query=" + data.hotel;
+    };
+
+});
+
+// 🎨 Changer background
+function changeBackground(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        document.body.style.backgroundImage = `url(${e.target.result})`;
+        document.body.classList.add("custom-bg");
+
+        // sauvegarde local (important)
+        localStorage.setItem("backgroundImage", e.target.result);
+    };
+
+    reader.readAsDataURL(file);
 }
+
+// 🔁 Charger background sauvegardé
+window.onload = () => {
+    const savedBg = localStorage.getItem("backgroundImage");
+    if (savedBg) {
+        document.body.style.backgroundImage = `url(${savedBg})`;
+        document.body.classList.add("custom-bg");
+    }
+};
+
 </script>
+
 </body>
 </html>
